@@ -59,14 +59,11 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
   public static final Logger LOG = LoggerFactory.getLogger(CernHrLifecycleHandler.class);
 
   public enum Action {
-    NO_ACTION,
-    DISABLE_ACCOUNT,
-    RESTORE_ACCOUNT
+    NO_ACTION, DISABLE_ACCOUNT, RESTORE_ACCOUNT
   }
 
   public enum Status {
-    OK,
-    ERROR
+    OK, ERROR
   }
 
   public static final String LABEL_CERN_PREFIX = "hr.cern";
@@ -166,7 +163,14 @@ public class CernHrLifecycleHandler implements Runnable, SchedulingConfigurer {
     Optional<IamLabel> actionLabel =
         account.getLabelByPrefixAndName(LABEL_CERN_PREFIX, LABEL_ACTION);
 
-    return actionLabel.isPresent() && actionLabel.get().getValue().equals(DISABLE_ACCOUNT.name());
+    if (actionLabel.isPresent()) {
+      if (actionLabel.get().getValue().equals(DISABLE_ACCOUNT.name())
+          || actionLabel.get().getValue().equals(NO_ACTION.name())) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private void disableAccount(IamAccount account) {
